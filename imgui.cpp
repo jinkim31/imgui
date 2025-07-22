@@ -19211,8 +19211,8 @@ static void ImGui::DockNodeCalcTabBarLayout(const ImGuiDockNode* node, ImRect* o
     ImRect r = ImRect(node->Pos.x, node->Pos.y, node->Pos.x + node->Size.x, node->Pos.y + g.FontSize + g.Style.FramePadding.y * 2.0f);
     if (out_title_rect) { *out_title_rect = r; }
 
-    r.Min.x += style.WindowBorderSize;
-    r.Max.x -= style.WindowBorderSize;
+    //r.Min.x += style.WindowBorderSize;
+    //r.Max.x -= style.WindowBorderSize;
 
     float button_sz = g.FontSize;
     //r.Min.x += style.FramePadding.x;

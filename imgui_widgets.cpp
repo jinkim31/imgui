@@ -40,6 +40,8 @@ Index of this file:
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
+#include <string>
+
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_internal.h"
@@ -47,6 +49,7 @@ Index of this file:
 // System includes
 #include <stdint.h>     // intptr_t
 
+#include "../IconFontCppHeaders/IconsMaterialDesign.h"
 //-------------------------------------------------------------------------
 // Warnings
 //-------------------------------------------------------------------------
@@ -926,7 +929,10 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
 
-    ImRect bb(pos, pos + ImVec2(g.FontSize, g.FontSize));
+    ImVec2 newPos = pos - ImVec2{g.Style.FramePadding.x, 0};
+    ImVec2 tlPos = newPos -g.Style.FramePadding;
+    ImVec2 buttonSize = ImVec2{ImGui::GetFrameHeight(), ImGui::GetFrameHeight()};
+    ImRect bb(tlPos, tlPos + buttonSize);
     bool is_clipped = !ItemAdd(bb, id);
     bool hovered, held;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_None);
@@ -941,10 +947,15 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
 
+    std::string text;
     if (dock_node)
-        RenderArrowDockMenu(window->DrawList, bb.Min, g.FontSize, text_col);
+        text = ICON_MD_DRAG_INDICATOR;
     else
-        RenderArrow(window->DrawList, bb.Min, text_col, window->Collapsed ? ImGuiDir_Right : ImGuiDir_Down, 1.0f);
+        text = ICON_MD_DRAG_INDICATOR;
+
+    auto textSize = ImGui::CalcTextSize(text.c_str());
+    window->DrawList->AddText(tlPos + buttonSize/2 - textSize/2, text_col, text.c_str());
+        //RenderArrow(window->DrawList, bb.Min, text_col, window->Collapsed ? ImGuiDir_Right : ImGuiDir_Down, 1.0f);
 
     // Switch to moving the window after mouse is moved beyond the initial drag threshold
     if (IsItemActive() && IsMouseDragging(0))
@@ -10610,8 +10621,8 @@ void ImGui::TabItemBackground(ImDrawList* draw_list, const ImRect& bb, ImGuiTabI
     IM_UNUSED(flags);
     IM_ASSERT(width > 0.0f);
     const float rounding = ImMax(0.0f, ImMin((flags & ImGuiTabItemFlags_Button) ? g.Style.FrameRounding : g.Style.TabRounding, width * 0.5f - 1.0f));
-    const float y1 = bb.Min.y + 1.0f;
-    const float y2 = bb.Max.y - g.Style.TabBarBorderSize;
+    const float y1 = bb.Min.y;// + 1.0f;
+    const float y2 = bb.Max.y;// - g.Style.TabBarBorderSize;
     draw_list->PathLineTo(ImVec2(bb.Min.x, y2));
     draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, y1 + rounding), rounding, 6, 9);
     draw_list->PathArcToFast(ImVec2(bb.Max.x - rounding, y1 + rounding), rounding, 9, 12);
