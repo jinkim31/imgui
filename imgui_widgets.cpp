@@ -929,10 +929,12 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
 
-    ImVec2 newPos = pos - ImVec2{g.Style.FramePadding.x, 0};
-    ImVec2 tlPos = newPos -g.Style.FramePadding;
-    ImVec2 buttonSize = ImVec2{ImGui::GetFrameHeight(), ImGui::GetFrameHeight()};
-    ImRect bb(tlPos, tlPos + buttonSize);
+    ImVec2 br = pos + ImVec2{g.FontSize, g.FontSize + g.Style.FramePadding.y};
+    std::string text = ICON_MD_DRAG_INDICATOR;
+    auto textSize = ImGui::CalcTextSize(text.c_str());
+    ImVec2 buttonSize = ImVec2{textSize.x + g.Style.FramePadding.x*2, ImGui::GetFrameHeight()};
+    ImVec2 rl = br - buttonSize;
+    ImRect bb(rl, br);
     bool is_clipped = !ItemAdd(bb, id);
     bool hovered, held;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_None);
@@ -947,15 +949,8 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
 
-    std::string text;
-    if (dock_node)
-        text = ICON_MD_DRAG_INDICATOR;
-    else
-        text = ICON_MD_DRAG_INDICATOR;
 
-    auto textSize = ImGui::CalcTextSize(text.c_str());
-    window->DrawList->AddText(tlPos + buttonSize/2 - textSize/2, text_col, text.c_str());
-        //RenderArrow(window->DrawList, bb.Min, text_col, window->Collapsed ? ImGuiDir_Right : ImGuiDir_Down, 1.0f);
+    window->DrawList->AddText(rl + g.Style.FramePadding, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
 
     // Switch to moving the window after mouse is moved beyond the initial drag threshold
     if (IsItemActive() && IsMouseDragging(0))
@@ -10520,7 +10515,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
             }
             else
             {
-                display_draw_list->AddLine(tl - ImVec2(0.5f, 0.5f), tr - ImVec2(0.5f, 0.5f), overline_col, style.TabBarOverlineSize);
+                display_draw_list->AddLine(tl - ImVec2(0.5f, 1.0f), tr - ImVec2(0.5f, 1.0f), overline_col, style.TabBarOverlineSize);
             }
         }
         RenderNavCursor(bb, id);
