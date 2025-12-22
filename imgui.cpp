@@ -1179,7 +1179,7 @@ IMPLEMENTING SUPPORT for ImGuiBackendFlags_RendererHasTextures:
 // System includes
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #include <stdint.h>     // intptr_t
-
+#include <iostream>
 // [Windows] On non-Visual Studio compilers, we default to IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS unless explicitly enabled
 #if defined(_WIN32) && !defined(_MSC_VER) && !defined(IMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS)
 #define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
@@ -19431,7 +19431,8 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
             PushItemFlag(ImGuiItemFlags_Disabled, true);
             PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_Text] * ImVec4(1.0f,1.0f,1.0f,0.4f));
         }
-        if (CloseButton(host_window->GetID("#CLOSE"), close_button_pos))
+        // Jin: use full frame height button
+        if (CloseButtonFrameHeight(host_window->GetID("#CLOSE"), close_button_pos))
         {
             node->WantCloseAll = true;
             for (int n = 0; n < tab_bar->Tabs.Size; n++)
@@ -19575,14 +19576,17 @@ static void ImGui::DockNodeCalcTabBarLayout(const ImGuiDockNode* node, ImRect* o
     //r.Min.x += style.WindowBorderSize;
     //r.Max.x -= style.WindowBorderSize;
 
-    float button_sz = g.FontSize;
+    // Jin: Button size is about the size of frameHeight
+    float button_sz = GetFrameHeight();
     //r.Min.x += style.FramePadding.x;
     //r.Max.x -= style.FramePadding.x;
     ImVec2 window_menu_button_pos = ImVec2(r.Min.x, r.Min.y + style.FramePadding.y);
     if (node->HasCloseButton)
     {
-        if (out_close_button_pos) *out_close_button_pos = ImVec2(r.Max.x - button_sz, r.Min.y + style.FramePadding.y);
-        r.Max.x -= button_sz + style.ItemInnerSpacing.x;
+        // Jin: remove y padding
+        if (out_close_button_pos) *out_close_button_pos = ImVec2(r.Max.x - button_sz, r.Min.y);
+        // Jin: remove spacing between close and menu button
+        r.Max.x -= button_sz;
     }
     if (node->HasWindowMenuButton && style.WindowMenuButtonPosition == ImGuiDir_Left)
     {
@@ -19590,7 +19594,8 @@ static void ImGui::DockNodeCalcTabBarLayout(const ImGuiDockNode* node, ImRect* o
     }
     else if (node->HasWindowMenuButton && style.WindowMenuButtonPosition == ImGuiDir_Right)
     {
-        window_menu_button_pos = ImVec2(r.Max.x - button_sz, r.Min.y + style.FramePadding.y);
+        // Jin: remove y padding
+        window_menu_button_pos = ImVec2(r.Max.x - button_sz, r.Min.y);
         r.Max.x -= button_sz + style.ItemInnerSpacing.x;
     }
     if (out_tab_bar_rect) { *out_tab_bar_rect = r; }

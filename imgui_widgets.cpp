@@ -919,12 +919,42 @@ bool ImGui::CloseButton(ImGuiID id, const ImVec2& pos)
     if (hovered)
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
-    const ImU32 cross_col = GetColorU32(ImGuiCol_PlotLines);
-    const ImVec2 cross_center = bb.GetCenter() - ImVec2(0.5f, 0.5f);
-    const float cross_extent = g.FontSize * 0.5f * 0.7071f - 1.0f;
-    const float cross_thickness = 1.0f; // FIXME-DPI
-    window->DrawList->AddLine(cross_center + ImVec2(+cross_extent, +cross_extent), cross_center + ImVec2(-cross_extent, -cross_extent), cross_col, cross_thickness);
-    window->DrawList->AddLine(cross_center + ImVec2(+cross_extent, -cross_extent), cross_center + ImVec2(-cross_extent, +cross_extent), cross_col, cross_thickness);
+    std::string text = ICON_MD_CLOSE;
+    window->DrawList->AddText(bb.Min, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
+
+    return pressed;
+}
+
+bool ImGui::CloseButtonFrameHeight(ImGuiID id, const ImVec2& pos)
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = g.CurrentWindow;
+
+    // Tweak 1: Shrink hit-testing area if button covers an abnormally large proportion of the visible region. That's in order to facilitate moving the window away. (#3825)
+    // This may better be applied as a general hit-rect reduction mechanism for all widgets to ensure the area to move window is always accessible?
+    const ImRect bb(pos, pos + ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+    ImRect bb_interact = bb;
+    const float area_to_visible_ratio = window->OuterRectClipped.GetArea() / bb.GetArea();
+    if (area_to_visible_ratio < 1.5f)
+        bb_interact.Expand(ImTrunc(bb_interact.GetSize() * -0.25f));
+
+    // Tweak 2: We intentionally allow interaction when clipped so that a mechanical Alt,Right,Activate sequence can always close a window.
+    // (this isn't the common behavior of buttons, but it doesn't affect the user because navigation tends to keep items visible in scrolling layer).
+    bool is_clipped = !ItemAdd(bb_interact, id);
+
+    bool hovered, held;
+    bool pressed = ButtonBehavior(bb_interact, id, &hovered, &held);
+    if (is_clipped)
+        return pressed;
+
+    // Render
+    ImU32 bg_col = GetColorU32(held ? ImGuiCol_ButtonActive : ImGuiCol_ButtonHovered);
+    if (hovered)
+        window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
+    RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
+    std::string text = ICON_MD_CLOSE;
+    window->DrawList->AddText(bb.Min + g.Style.FramePadding, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
+
 
     return pressed;
 }
@@ -935,10 +965,10 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
 
-    ImVec2 br = pos + ImVec2{g.FontSize, g.FontSize + g.Style.FramePadding.y};
-    std::string text = ICON_MD_DRAG_INDICATOR;
-    auto textSize = ImGui::CalcTextSize(text.c_str());
-    ImVec2 buttonSize = ImVec2{textSize.x + g.Style.FramePadding.x*2, ImGui::GetFrameHeight()};
+    // Jin: width, hight is about the size of frameHeight
+    ImVec2 buttonSize = ImVec2{ImGui::GetFrameHeight(), ImGui::GetFrameHeight()};
+    ImVec2 br = pos + buttonSize;
+    // Jin: Use MD icon
     ImVec2 rl = br - buttonSize;
     ImRect bb(rl, br);
     bool is_clipped = !ItemAdd(bb, id);
@@ -950,12 +980,10 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
     // Render
     //bool is_dock_menu = (window->DockNodeAsHost && !window->Collapsed);
     ImU32 bg_col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-    ImU32 text_col = GetColorU32(ImGuiCol_Text);
     if (hovered || held)
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
-
-
+    std::string text = ICON_MD_DRAG_INDICATOR;
     window->DrawList->AddText(rl + g.Style.FramePadding, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
 
     // Switch to moving the window after mouse is moved beyond the initial drag threshold
