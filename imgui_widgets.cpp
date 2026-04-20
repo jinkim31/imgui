@@ -49,7 +49,7 @@ Index of this file:
 // System includes
 #include <stdint.h>     // intptr_t
 
-#include "../IconFontCppHeaders/IconsMaterialDesign.h"
+#include "../IconFontCppHeaders/IconsLucide.h"
 //-------------------------------------------------------------------------
 // Warnings
 //-------------------------------------------------------------------------
@@ -919,7 +919,7 @@ bool ImGui::CloseButton(ImGuiID id, const ImVec2& pos)
     if (hovered)
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
-    std::string text = ICON_MD_CLOSE;
+    std::string text = ICON_LC_X;
     window->DrawList->AddText(bb.Min, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
 
     return pressed;
@@ -952,7 +952,7 @@ bool ImGui::CloseButtonFrameHeight(ImGuiID id, const ImVec2& pos)
     if (hovered)
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
-    std::string text = ICON_MD_CLOSE;
+    std::string text = ICON_LC_X;
     window->DrawList->AddText(bb.Min + g.Style.FramePadding, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
 
 
@@ -983,7 +983,7 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos, ImGuiDockNode* dock_no
     if (hovered || held)
         window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
     RenderNavCursor(bb, id, ImGuiNavRenderCursorFlags_Compact);
-    std::string text = ICON_MD_DRAG_INDICATOR;
+    std::string text = ICON_LC_GRIP_VERTICAL;
     window->DrawList->AddText(rl + g.Style.FramePadding, ImGui::GetColorU32(ImGuiCol_PlotLines), text.c_str());
 
     // Switch to moving the window after mouse is moved beyond the initial drag threshold
